@@ -1,0 +1,5 @@
+#Python Compilation Files
+*.pyc
+
+#VirtualEnv
+a3c_virtualenv/

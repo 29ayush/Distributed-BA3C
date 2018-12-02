@@ -32,7 +32,7 @@ from tensorpack.utils.gpu import get_nr_gpu
 from tensorpack.utils.serialize import *
 from tensorpack.utils.stat import StatCounter
 from tensorpack.tfutils import symbolic_functions as symbf
-from tensorflow_slurm_utils import tf_server_from_slurm
+from tensorflow_pbspro_utils import tf_server_from_pbspro
 from tensorpack.RL import *
 import common
 from common import (play_model, Evaluator, HyperParameterScheduler, PeriodicPerStepCallback, DebugLogCallback, HeartPulseCallback, eval_model_multithread)
@@ -60,7 +60,7 @@ for arg in vars(args):
 def eprint(*args, **kwargs):
     sys.stderr.write(','.join(args))
 
-cluster, my_job_name, my_task_index = tf_server_from_slurm(ps_number=args.ps, port_number=args.tf_port)
+cluster, my_job_name, my_task_index = tf_server_from_pbspro(ps_number=args.ps, port_number=args.tf_port)
 if args.eval_node:
     cluster['worker'] = cluster['worker'][:-1]
 if args.record_node:
@@ -75,7 +75,7 @@ for i in range(retries):
         server = tf.train.Server(cluster_spec, job_name=my_job_name, task_index=my_task_index)
         break
     except Exception as e:
-        print '========= EXCEPTION WHILE STARTING TF SERVER [{}] ====='.format(os.environ['SLURMD_NODENAME'])
+        print '========= EXCEPTION WHILE STARTING TF SERVER [{}] ====='.format(os.environ['PBS_ARRAY_INDEX'])
         traceback.print_exc()
         time.sleep(1)
 
@@ -613,7 +613,7 @@ def get_config(args=None, is_chief=True, task_index=0, chief_worker_hostname="",
            ]
 
     if args.debug_charts:
-        callbacks.append(HeartPulseCallback('heart_pulse_{}.log'.format(os.environ['SLURMD_NODENAME'])))
+        callbacks.append(HeartPulseCallback('heart_pulse_{}.log'.format(os.environ['PBS_ARRAY_INDEX'])))
 
     if args.early_stopping is not None:
         args.early_stopping = float(args.early_stopping)
@@ -720,5 +720,5 @@ if __name__ == '__main__':
                                     trainer = AsyncMultiGPUTrainer(config, predict_tower=predict_towers)
                                     trainer.train()
                                 except Exception as e:
-                                    print ('===== EXCEPTION IN TRAIN-ATARI.PY [{}] ======'.format(os.environ['SLURMD_NODENAME']))
+                                    print ('===== EXCEPTION IN TRAIN-ATARI.PY [{}] ======'.format(os.environ['PBS_ARRAY_INDEX']))
                                     traceback.print_exc()

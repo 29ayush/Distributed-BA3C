@@ -1,5 +1,5 @@
 #! /bin/bash
-echo "SLURM_JOB_ID " $SLURM_JOB_ID  "; SLURM_JOB_NAME " $SLURM_JOB_NAME "; SLURM_JOB_NODELIST " $SLURM_JOB_NODELIST "; SLURMD_NODENAME " $SLURMD_NODENAME  "; SLURM_JOB_NUM_NODES " $SLURM_JOB_NUM_NODES
+echo "PBS_JOBID " $PBS_JOBID  "; PBS_NODELIST " $PBS_NODEFILE ";
 
 PORT=$1
 TF_PORT=$2
@@ -37,10 +37,10 @@ SCHEDULE_HYPER=${33}
 
 ################################################
 # write your info here !!!
-EXPERIMENTS_DIR=/net/people/plgtgrel/adam/experiments/
-VIRTUAL_ENV=/net/people/plgtgrel/adam/env/test_env
-DISTRIBUTED_A3C_PATH=/net/people/plgtgrel/adam/distributed_tp/
-export TENSORPACK_PIPEDIR=/net/archive/groups/plggluna/intel_2/tmp_sockets/
+EXPERIMENTS_DIR=/home/lapotp/Desktop/project/Distributed-BA3C/experiments
+VIRTUAL_ENV=/home/lapotp/Desktop/project/Distributed-BA3C/a3c_virtualenv
+DISTRIBUTED_A3C_PATH=/home/lapotp/Desktop/project/Distributed-BA3C
+export TENSORPACK_PIPEDIR=/home/lapotp/Desktop/project/Distributed-BA3C/tmp_sockets
 ################################################
 
 EXPERIMENT_DIR="${EXPERIMENTS_DIR}/${EXPERIMENT_NAME}"
@@ -62,6 +62,7 @@ fi
 TENSORPACK_CPU_PATH="${DISTRIBUTED_A3C_PATH}/src/tensorpack_cpu/"
 OPENAI_GYM_PATH="${DISTRIBUTED_A3C_PATH}/src/OpenAIGym/"
 
+
 module load plgrid/tools/python/2.7.13
 module load plgrid/libs/mkl/2017.0.0
 module load tools/gcc/6.2.0
@@ -82,14 +83,14 @@ PROGRAM_ARGS="--mkl 0 --dummy 0 --sync 0 --cpu 1 --artificial_slowdown 0 --queue
 if [ "$is_chief" == "eval" ]
 then
     echo "STARING EVAL NODE"
-    python ${OPENAI_GYM_PATH}/eval_model.py --fc_neurons $FC_NEURONS --fc_splits $FC_SPLITS --models_dir $MODELS_DIR --server_port $PORT --env $ENVIRONMENT --replace_with_conv $REPLACE_WITH_CONV --ps $PS 2>&1 | tee -a ${LOG_DIR}/output_${SLURMD_NODENAME}.log
+    python ${OPENAI_GYM_PATH}/eval_model.py --fc_neurons $FC_NEURONS --fc_splits $FC_SPLITS --models_dir $MODELS_DIR --server_port $PORT --env $ENVIRONMENT --replace_with_conv $REPLACE_WITH_CONV --ps $PS 2>&1 | tee -a ${LOG_DIR}/output_${PBS_JOBID}.log
     exit
 fi
 
 if [ "$is_chief" == "record" ]
 then
     echo "STARTING RECORD NODE"
-    python ${OPENAI_GYM_PATH}/record_model.py --fc_neurons $FC_NEURONS --fc_splits $FC_SPLITS --env $ENVIRONMENT --replace_with_conv $REPLACE_WITH_CONV --models_dir $MODELS_DIR --time $RECORD_LENGTH 2>&1 | tee -a ${LOG_DIR}/output_${SLURMD_NODENAME}.log
+    python ${OPENAI_GYM_PATH}/record_model.py --fc_neurons $FC_NEURONS --fc_splits $FC_SPLITS --env $ENVIRONMENT --replace_with_conv $REPLACE_WITH_CONV --models_dir $MODELS_DIR --time $RECORD_LENGTH 2>&1 | tee -a ${LOG_DIR}/output_${PBS_JOBID}.log
     exit
 fi
 
@@ -99,7 +100,7 @@ echo "OFFLINE:" $OFFLINE
 
 if [ "$SAVE_OUTPUT" == "True" ]
 then
-    python $PROGRAM_PATH $PROGRAM_ARGS 2>&1 | tee -a ${LOG_DIR}/output_${SLURMD_NODENAME}.log
+    python $PROGRAM_PATH $PROGRAM_ARGS 2>&1 | tee -a ${LOG_DIR}/output_${PBS_JOBID}.log
 else
     python $PROGRAM_PATH $PROGRAM_ARGS
 fi

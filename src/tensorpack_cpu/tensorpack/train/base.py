@@ -107,22 +107,22 @@ class Trainer(object):
 
     def main_loop(self):
         # some final operations that might modify the graph
-        logger.info("[{}] Initializing graph variables ...".format(os.environ['SLURMD_NODENAME']))
+        logger.info("[{}] Initializing graph variables ...".format(os.environ['PBS_ARRAY_INDEX']))
 
         #self.sess.run(tf.initialize_all_variables())
 
         self.config.session_init.init(self.sess)
 #        tf.get_default_graph().finalize()
         callbacks = self.config.callbacks
-        logger.info("[{}] Starting concurrency...".format(os.environ['SLURMD_NODENAME']))
+        logger.info("[{}] Starting concurrency...".format(os.environ['PBS_ARRAY_INDEX']))
         self._start_concurrency()
         #with self.sess.as_default():
-        logger.info("[{}] Setting default session".format(os.environ['SLURMD_NODENAME']))
+        logger.info("[{}] Setting default session".format(os.environ['PBS_ARRAY_INDEX']))
         with ops.default_session(self.sess):
             try:
-                logger.info("[{}] Getting global step".format(os.environ['SLURMD_NODENAME']))
+                logger.info("[{}] Getting global step".format(os.environ['PBS_ARRAY_INDEX']))
                 self.global_step = get_global_step()
-                logger.info("[{}] Start training with global_step={}".format(os.environ['SLURMD_NODENAME'], self.global_step))
+                logger.info("[{}] Start training with global_step={}".format(os.environ['PBS_ARRAY_INDEX'], self.global_step))
 
                 if self.config.extra_arg['is_chief']:
                     server = neptune_mp_server.Server(
@@ -175,7 +175,7 @@ class Trainer(object):
                     logger.info("===============================================================")
                     if is_chief:
                         logger.info("CHIEF!")
-                    logger.info("[{}] Creating the session".format(os.environ['SLURMD_NODENAME']))
+                    logger.info("[{}] Creating the session".format(os.environ['PBS_ARRAY_INDEX']))
                     logger.info("===============================================================")
 
                     if use_sync_opt == 0:
@@ -185,7 +185,7 @@ class Trainer(object):
                         self.sess.set(tf.train.MonitoredTrainingSession(master=worker_host, is_chief=is_chief, hooks=[hooks]))
 
                     logger.info("===============================================================")
-                    logger.info("[{}] Session created".format(os.environ['SLURMD_NODENAME']))
+                    logger.info("[{}] Session created".format(os.environ['PBS_ARRAY_INDEX']))
                     logger.info("===============================================================")
                 self.coord.set(tf.train.Coordinator())
 

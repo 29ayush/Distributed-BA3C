@@ -8,7 +8,7 @@ from tensorpack.RL.gymenv import GymEnv
 from tensorpack.RL.history import HistoryFramePlayer
 from tensorpack.RL import *
 
-from tensorflow_slurm_utils import tf_server_from_slurm
+from tensorflow_pbspro_utils import tf_server_from_pbspro
 import neptune_mp_server
 import time
 from six.moves import queue

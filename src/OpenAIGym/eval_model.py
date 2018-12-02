@@ -8,7 +8,7 @@ from tensorpack.RL.gymenv import GymEnv
 from tensorpack.RL.history import HistoryFramePlayer
 from tensorpack.RL import *
 
-from tensorflow_slurm_utils import tf_server_from_slurm
+from tensorflow_pbspro_utils import tf_server_from_pbspro
 import neptune_mp_server
 import time
 from six.moves import queue
@@ -42,7 +42,7 @@ parser.add_argument('--ps', required=True, type=int)
 
 args = parser.parse_args()
 
-cluster, my_job_name, my_task_index = tf_server_from_slurm(ps_number=args.ps, port_number=0)
+cluster, my_job_name, my_task_index = tf_server_from_pbspro(ps_number=args.ps, port_number=0)
 args.server_host = cluster['worker'][0].split(':')[0]
 
 def get_player(viz=False, train=False, dumpdir=None, videofile=None):

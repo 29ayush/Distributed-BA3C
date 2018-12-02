@@ -236,7 +236,7 @@ class Server(object):
         print 'server main loop'
         context = zmq.Context()
         socket = context.socket(zmq.REP)
-        hostname = os.environ['SLURMD_NODENAME']
+        hostname = os.environ['PBS_ARRAY_INDEX']
         address = "tcp://*:{}".format(self.port)
         print 'before socket bind... {}'.format(address)
         socket.bind(address)

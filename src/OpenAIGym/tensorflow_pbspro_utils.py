@@ -4,10 +4,10 @@ import unittest
 import re
 import os
 
-def tf_server_from_slurm(ps_number, port_number=2222):
+def tf_server_from_pbspro(ps_number, port_number=2222):
     """
     Creates a tensorflow.train.Server from environment variables
-    provided by the slurm cluster management system. The server
+    provided by the pbspro cluster management system. The server
     is not started.
 
     @param: ps_number number of parameter servers to run
@@ -16,29 +16,25 @@ def tf_server_from_slurm(ps_number, port_number=2222):
              task_name and task_id
     """
 
-    nodelist = os.environ["SLURM_JOB_NODELIST"]
-    nodename = os.environ["SLURMD_NODENAME"]
+    nodelist = os.environ["PBS_NODEFILE"]
     nodelist = _expand_nodelist(nodelist)
-    num_nodes = int(os.getenv("SLURM_JOB_NUM_NODES"))
 
-    if len(nodelist) != num_nodes:
-        raise ValueError("Number of slurm nodes {} not equal to {}".format(len(nodelist), num_nodes))
+    array_index = int(os.environ["PBS_ARRAY_INDEX"]) - 1 
+    if(array_index > len(nodelist))
+        raise ValueError("PBS array node index {} out of range {}".format(len(nodelist), array_index))
+    enodelist = enumerate(nodelist)
+    ps_nodes = [(i,node) for i, node in enumerate(nodelist) if i < ps_number]
+    worker_nodes = [(i,node) for i, node in enumerate(nodelist) if i >= ps_number]
 
-    if nodename not in nodelist:
-        raise ValueError("Nodename({}) not in nodelist({}). This should not happen! ".format(nodename,nodelist))
-
-    ps_nodes = [node for i, node in enumerate(nodelist) if i < ps_number]
-    worker_nodes = [node for i, node in enumerate(nodelist) if i >= ps_number]
-
-    if nodename in ps_nodes:
-        my_job_name = "ps"
-        my_task_index = ps_nodes.index(nodename)
+    if (array_index,nodelist[array_index]) in ps_nodes:
+        my_job_name = "ps" 
+        my_task_index = array_index
     else:
         my_job_name = "worker"
-        my_task_index = worker_nodes.index(nodename)
+        my_task_index = array_index
 
-    worker_sockets = [":".join([node, str(port_number + 1)]) for node in worker_nodes]
-    ps_sockets = [":".join([node, str(port_number)]) for node in ps_nodes]
+    worker_sockets = [":".join([node, str(port_number + 1)]) for i,node in worker_nodes]
+    ps_sockets = [":".join([node, str(port_number)]) for i,node in ps_nodes]
     cluster = {"worker": worker_sockets, "ps" : ps_sockets}
 
     return cluster, my_job_name, my_task_index

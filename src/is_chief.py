@@ -3,8 +3,8 @@ import tensorflow as tf
 import sys
 
 sys.path.append(sys.argv[1])
-from tensorflow_slurm_utils import tf_server_from_slurm
-c, n, i = tf_server_from_slurm(ps_number=int(sys.argv[2]))
+from tensorflow_pbspro_utils import tf_server_from_pbspro
+c, n, i = tf_server_from_pbspro(ps_number=int(sys.argv[2]))
 t = 0
 if sys.argv[3] == 'True':
     t += 1

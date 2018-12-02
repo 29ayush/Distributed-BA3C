@@ -315,7 +315,7 @@ class AsyncMultiGPUTrainer(MultiGPUTrainer):
         #if int(self.async_step_counter.__str__()) % 100 == 0:
         import os
         s = ("[{node}]  step: {step}, step_time {step_time}, mean_step_time {mean_step_time}, it/s {it_s}".format(
-             node=os.getenv("SLURMD_NODENAME", "none"),
+             node=os.getenv("PBS_ARRAY_INDEX", "none"),
              step=self.async_step_counter.__str__(),
              step_time=round(elapsed_time, 2),
              mean_step_time=round(mean_step_time,2),

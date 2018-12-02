@@ -146,7 +146,7 @@ class PredictorWorkerThread(threading.Thread):
                         f.set_result([False])
 
             except Exception as e:
-                print "EXCEPTION IN PREDICTOR THREAD [{}] ======".format(os.environ["SLURMD_NODENAME"])
+                print "EXCEPTION IN PREDICTOR THREAD [{}] ======".format(os.environ["PBS_ARRAY_INDEX"])
                 traceback.print_exc()
 
     def fetch_batch(self):

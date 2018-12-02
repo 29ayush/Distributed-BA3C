@@ -119,7 +119,7 @@ class Evaluator(Callback):
             self.pred_funcs = [self.trainer.get_predict_func(
                 self.input_names, self.output_names)] * NR_PROC
         except Exception as e:
-            print ('============= EXCEPTION WHEN CREATING THE EVALUATION GRAPH [{}]======== '.format(os.environ["SLURMD_NODENAME"]))
+            print ('============= EXCEPTION WHEN CREATING THE EVALUATION GRAPH [{}]======== '.format(int(os.environ["PBS_ARRAY_INDEX")) - 1 )
             traceback.print_exc()
 
     def _trigger_epoch(self):
@@ -138,14 +138,14 @@ class Evaluator(Callback):
 
         if self.solved_score is not None:
             if mean >= self.solved_score:
-                os.system('scancel {}'.format(os.environ['SLURM_JOB_ID']))
+                os.system('scancel {}'.format(os.environ['PBS_JOBID']))
 
 class HeartPulseCallback(Callback):
     def __init__(self, filename):
         self.filename = filename
         self.fd = open(self.filename, 'w')
 
-        self.fd.write('{}\n'.format(os.environ['SLURMD_NODENAME']))
+        self.fd.write('{}\n'.format(os.environ['PBS_ARRAY_INDEX']))
         self.fd.flush()
 
         self.step_counter = 0
